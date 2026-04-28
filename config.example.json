@@ -1,0 +1,12 @@
+{
+  "companionConfigDir": "C:\\Users\\user\\AppData\\Roaming\\companion-nodejs\\v4.1",
+  "companionExe": "C:\\Program Files\\Bitfocus\\Companion\\companion.exe",
+  "companionPort": 8000,
+  "gitRepoDir": "C:\\Users\\user\\companion-sync-repo",
+  "remote": {
+    "url": "https://github.com/user/companion-config",
+    "username": "user",
+    "token": "ghp_..."
+  },
+  "syncIntervalMs": 300000
+}

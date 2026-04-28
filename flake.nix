@@ -1,0 +1,20 @@
+{
+  description = "Companion Sync - Desktop companion tool for Bitfocus Companion";
+
+  inputs.nixpkgs.url = "github:nixos/nixpkgs/nixos-24.05";
+
+  outputs = { self, nixpkgs }:
+    let
+      supportedSystems = [ "x86_64-linux" "aarch64-linux" ];
+      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
+        pkgs = import nixpkgs { inherit system; };
+      });
+    in
+    {
+      devShells = forEachSupportedSystem ({ pkgs }: {
+        default = pkgs.mkShell {
+          packages = with pkgs; [ nodejs nodePackages.npm ];
+        };
+      });
+    };
+}

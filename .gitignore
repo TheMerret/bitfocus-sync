@@ -1,0 +1,8 @@
+node_modules/
+.env
+.git/
+config.json
+*.sqlite-shm
+*.sqlite-wal
+dist/
+*.log

@@ -1,0 +1,30 @@
+{
+  "name": "companion-sync",
+  "version": "1.0.0",
+  "description": "Desktop companion tool for Bitfocus Companion with Git sync and profile management",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently \"node server/index.ts\" \"vite\"",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18",
+    "react-dom": "^18",
+    "express": "^4",
+    "isomorphic-git": "^1",
+    "better-sqlite3": "^9",
+    "@isomorphic-git/lightning-fs": "^1",
+    "buffer": "^6.0.3"
+  },
+  "devDependencies": {
+    "vite": "^5",
+    "@vitejs/plugin-react": "^4",
+    "typescript": "^5",
+    "concurrently": "^8",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/express": "^4",
+    "@types/node": "^20"
+  }
+}
