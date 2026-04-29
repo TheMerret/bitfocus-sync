@@ -1,5 +1,6 @@
-import { clone, commit, push, checkout, branch, log } from 'isomorphic-git'
-import fs from 'fs/promises'
+import { clone, commit, push, checkout, branch, log, statusMatrix, add } from 'isomorphic-git'
+import http from 'isomorphic-git/http/node'
+import fs from 'fs'
 
 interface GitConfig {
   url: string
@@ -25,13 +26,19 @@ interface BranchInfo {
 }
 
 export async function initGitRepo(config: SyncConfig): Promise<void> {
+  const gitDir = `${config.gitRepoDir}/.git`
+  let exists = false
   try {
-    await fs.access(config.gitRepoDir)
-    console.log('Git repo already exists')
+    await fs.promises.access(gitDir)
+    exists = true
   } catch {
+    // not cloned yet
+  }
+  if (!exists) {
     console.log('Cloning git repository...')
     await clone({
       fs,
+      http,
       dir: config.gitRepoDir,
       url: config.remote.url,
       depth: 1,
@@ -44,19 +51,21 @@ export async function initGitRepo(config: SyncConfig): Promise<void> {
   }
 }
 
-git remote add origin https://github.com/TheMerret/bitfocus-sync.git
-git branch -M master
-git push -u origin master
+export async function hasChanges(config: SyncConfig): Promise<boolean> {
+  const matrix = await statusMatrix({ fs, dir: config.gitRepoDir })
+  return matrix.some(([, head, workdir, stage]) => head !== 1 || workdir !== 1 || stage !== 1)
+}
 
+export async function stageAll(config: SyncConfig): Promise<void> {
+  const matrix = await statusMatrix({ fs, dir: config.gitRepoDir })
+  for (const [filepath] of matrix) {
+    await add({ fs, dir: config.gitRepoDir, filepath: filepath as string })
+  }
+}
 
 export async function commitChanges(config: SyncConfig, message: string): Promise<string> {
-  const status = await log({ fs, dir: config.gitRepoDir })
-  
-  if (!status || status.length === 0) {
-    throw new Error('No changes to commit')
-  }
-
-  await commit({
+  await stageAll(config)
+  const oid = await commit({
     fs,
     dir: config.gitRepoDir,
     message,
@@ -65,13 +74,13 @@ export async function commitChanges(config: SyncConfig, message: string): Promis
       email: 'sync@companion.local',
     },
   })
-  
-  return 'committed'
+  return oid
 }
 
 export async function pushChanges(config: SyncConfig): Promise<void> {
   await push({
     fs,
+    http,
     dir: config.gitRepoDir,
     remote: 'origin',
     ref: 'HEAD',

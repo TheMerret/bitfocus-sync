@@ -9,6 +9,24 @@ A desktop companion tool for **Bitfocus Companion** that:
 
 ---
 
+## Development environment
+
+This project uses **Nix** for reproducible development environments.
+
+- Run all commands inside `nix develop` (or use `direnv` with `.envrc` — already present)
+- `nix develop` provides Node.js and npm; do NOT rely on system Node
+- Entry: `nix develop --command bash` or just `nix develop`
+- Supported platforms: `x86_64-linux`, `aarch64-linux`, `x86_64-darwin`, `aarch64-darwin`
+
+Dev workflow:
+```sh
+nix develop
+npm install
+npm run dev
+```
+
+---
+
 ## Stack
 
 | Layer | Choice |
