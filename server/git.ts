@@ -1,6 +1,7 @@
 import { clone, commit, push, checkout, branch, log, statusMatrix, add, listBranches as gitListBranches } from 'isomorphic-git'
 import http from 'isomorphic-git/http/node'
 import fs from 'fs'
+import { getCurrentBranch } from './api'
 
 interface GitConfig {
   url: string
@@ -78,17 +79,19 @@ export async function commitChanges(config: SyncConfig, message: string): Promis
 }
 
 export async function pushChanges(config: SyncConfig): Promise<void> {
+  const curBranch = getCurrentBranch(config.gitRepoDir);
   await push({
     fs,
     http,
     dir: config.gitRepoDir,
     remote: 'origin',
-    ref: 'HEAD',
+    ref: curBranch,
     onAuth: () => ({
-      username: config.remote.username,
-      password: config.remote.token,
+      username: config.remote.token,
     }),
+    force: true,
   })
+  console.log('finish push')
 }
 
 export async function switchBranch(config: SyncConfig, branchName: string): Promise<void> {
@@ -100,7 +103,7 @@ export async function switchBranch(config: SyncConfig, branchName: string): Prom
 }
 
 export async function createBranch(config: SyncConfig, branchName: string): Promise<void> {
-  await checkout({
+  await branch({
     fs,
     dir: config.gitRepoDir,
     ref: branchName,
@@ -108,20 +111,23 @@ export async function createBranch(config: SyncConfig, branchName: string): Prom
 }
 
 export async function listBranches(config: SyncConfig): Promise<BranchInfo[]> {
-  const branchResult = await gitListBranches({
+  const remoteResult = await gitListBranches({
     fs,
     dir: config.gitRepoDir,
     remote: 'origin',
   })
+  const localResult = await gitListBranches({
+    fs,
+    dir: config.gitRepoDir,
+  })
+
+  const branchResult = Array.from(new Set([...remoteResult, ...localResult]));
   
   const branchInfos: BranchInfo[] = []
   if (branchResult && Array.isArray(branchResult)) {
     for (const branch of branchResult) {
-      if (branch.startsWith('remotes/origin/')) {
-        const localName = branch.replace('remotes/origin/', '')
-        const commitInfo = await getBranchLatestCommit(config, localName)
-        branchInfos.push({ name: localName, lastCommit: commitInfo })
-      }
+        const commitInfo = await getBranchLatestCommit(config, branch)
+        branchInfos.push({ name: branch, lastCommit: commitInfo })
     }
   }
   

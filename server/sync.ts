@@ -78,6 +78,8 @@ async function copyConfigFiles(srcDir: string, destDir: string): Promise<void> {
 export function startSyncScheduler(): void {
   const config = loadConfig()
   const interval = config.syncIntervalMs ?? 300000
+  console.log('start syncing')
+  runSync()
   syncTimer = setInterval(() => {
     if (state.autoSync) runSync()
   }, interval)

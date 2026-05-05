@@ -157,7 +157,7 @@ apiRouter.post('/settings/test-companion', (_req: Request, res: Response) => {
   }
 })
 
-function getCurrentBranch(repoDir: string): string {
+export function getCurrentBranch(repoDir: string): string {
   try {
     const headPath = `${repoDir}/.git/HEAD`
     const head = fs.readFileSync(headPath, 'utf8').trim()
