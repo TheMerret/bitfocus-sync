@@ -6,3 +6,4 @@ config.json
 *.sqlite-wal
 dist/
 *.log
+.direnv
