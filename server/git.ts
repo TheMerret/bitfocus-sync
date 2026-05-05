@@ -1,4 +1,4 @@
-import { clone, commit, push, checkout, branch, log, statusMatrix, add } from 'isomorphic-git'
+import { clone, commit, push, checkout, branch, log, statusMatrix, add, listBranches as gitListBranches } from 'isomorphic-git'
 import http from 'isomorphic-git/http/node'
 import fs from 'fs'
 
@@ -104,15 +104,14 @@ export async function createBranch(config: SyncConfig, branchName: string): Prom
     fs,
     dir: config.gitRepoDir,
     ref: branchName,
-    startPoint: 'HEAD',
   })
 }
 
 export async function listBranches(config: SyncConfig): Promise<BranchInfo[]> {
-  const branchResult = await branch({
+  const branchResult = await gitListBranches({
     fs,
     dir: config.gitRepoDir,
-    remote: true,
+    remote: 'origin',
   })
   
   const branchInfos: BranchInfo[] = []
